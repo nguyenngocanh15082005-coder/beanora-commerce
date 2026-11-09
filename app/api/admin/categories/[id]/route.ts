@@ -1,0 +1,7 @@
+import { NextResponse } from "next/server";
+import { z } from "zod";
+import { prisma } from "@/lib/prisma";
+import { requirePermission } from "@/lib/auth";
+import { apiError } from "@/lib/http";
+export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) { try { const admin = await requirePermission("products:write"); const { id } = await params; const input = z.object({ name: z.string().trim().min(2).optional(), slug: z.string().regex(/^[a-z0-9-]+$/).optional(), description: z.string().max(1000).optional(), position: z.number().int().nonnegative().optional(), active: z.boolean().optional() }).parse(await request.json()); await prisma.category.update({ where: { id }, data: input }); await prisma.adminAuditLog.create({ data: { actorId: admin.id, action: "CATEGORY_UPDATE", entityType: "Category", entityId: id, metadata: input } }); return NextResponse.json({ ok: true }); } catch (error) { return apiError(error); } }
+export async function DELETE(_: Request, { params }: { params: Promise<{ id: string }> }) { try { const admin = await requirePermission("products:write"); const { id } = await params; await prisma.category.delete({ where: { id } }); await prisma.adminAuditLog.create({ data: { actorId: admin.id, action: "CATEGORY_DELETE", entityType: "Category", entityId: id } }); return NextResponse.json({ ok: true }); } catch (error) { return apiError(error); } }

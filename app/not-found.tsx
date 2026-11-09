@@ -1,0 +1,2 @@
+import Link from "next/link";
+export default function NotFound() { return <div className="container not-found"><span>404</span><h1>Không tìm thấy trang bạn cần.</h1><p>Trang không tồn tại hoặc bạn chưa cung cấp đủ thông tin để xem nội dung được bảo vệ.</p><Link href="/" className="button button-dark">Về trang chủ</Link><Link href="/shop" className="button button-outline">Khám phá cà phê</Link></div>; }

@@ -1,0 +1,4 @@
+import { prisma } from "@/lib/prisma";
+import { AdminHeader } from "@/components/admin/admin-header";
+import { AdminPromotions } from "@/components/admin/admin-promotions";
+export default async function PromotionsPage() { const coupons = await prisma.coupon.findMany({ include: { _count: { select: { usages: true } } }, orderBy: { startsAt: "desc" } }); return <><AdminHeader eyebrow="CHƯƠNG TRÌNH ƯU ĐÃI" title="Mã giảm giá" description="Tạo và kiểm soát voucher áp dụng tại checkout; mọi lượt dùng được liên kết với đơn hàng." /><AdminPromotions coupons={coupons.map((c) => ({ id: c.id, code: c.code, type: c.type, value: c.value, minimumOrder: c.minimumOrder, maxDiscount: c.maxDiscount, usageLimit: c.usageLimit, perUserLimit: c.perUserLimit, startsAt: c.startsAt.toISOString().slice(0,16), endsAt: c.endsAt.toISOString().slice(0,16), active: c.active, used: c._count.usages }))} /></>; }

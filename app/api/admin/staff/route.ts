@@ -1,0 +1,7 @@
+import { NextResponse } from "next/server";
+import bcrypt from "bcryptjs";
+import { z } from "zod";
+import { prisma } from "@/lib/prisma";
+import { isSuperAdmin, requireAdmin } from "@/lib/auth";
+import { apiError } from "@/lib/http";
+export async function POST(request: Request) { try { const admin = await requireAdmin(); if (!isSuperAdmin(admin)) return NextResponse.json({ error: "Chỉ Super Admin được tạo tài khoản nhân sự." }, { status: 403 }); const input = z.object({ name: z.string().trim().min(2).max(80), email: z.string().email(), phone: z.string().max(20).optional(), password: z.string().min(10).max(72).regex(/[A-Z]/).regex(/[a-z]/).regex(/\d/), roleCode: z.enum(["ADMIN","ORDER_MANAGER","PRODUCT_MANAGER","SUPPORT","WAREHOUSE"]) }).parse(await request.json()); const email = input.email.toLowerCase(); if (await prisma.user.findUnique({ where: { email } })) return NextResponse.json({ error: "Email đã tồn tại." }, { status: 409 }); const role = await prisma.role.findUniqueOrThrow({ where: { code: input.roleCode } }); const user = await prisma.user.create({ data: { name: input.name, email, phone: input.phone || null, passwordHash: await bcrypt.hash(input.password, 12), emailVerifiedAt: new Date(), roles: { create: { roleId: role.id } } } }); await prisma.adminAuditLog.create({ data: { actorId: admin.id, action: "STAFF_CREATE", entityType: "User", entityId: user.id, metadata: { roleCode: input.roleCode } } }); return NextResponse.json({ user: { id: user.id, email: user.email } }, { status: 201 }); } catch (error) { return apiError(error); } }

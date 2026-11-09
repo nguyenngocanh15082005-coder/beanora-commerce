@@ -1,0 +1,5 @@
+import type { Metadata } from "next";
+import { Mail, MapPin, MessageCircle, Phone } from "lucide-react";
+import { ContactForm } from "@/components/contact-form";
+export const metadata: Metadata = { title: "Liên hệ & tư vấn" };
+export default function ContactPage() { return <><section className="page-hero"><div className="container"><span className="eyebrow">Liên hệ Beanora</span><h1>Chúng tôi luôn sẵn lòng<br />nghe bạn chia sẻ.</h1><p>Tư vấn chọn cà phê, hỗ trợ đơn hàng hoặc hợp tác cùng Beanora.</p></div></section><section className="section contact-section"><div className="container contact-layout"><div className="contact-info"><h2>Hãy bắt đầu từ một lời nhắn.</h2><p>Gửi thông tin qua biểu mẫu. Tin nhắn được lưu vào hệ thống để Beanora theo dõi và phản hồi.</p><div><MapPin /><span><strong>Địa chỉ</strong>Biên Hòa, Đồng Nai, Việt Nam</span></div><div><Mail /><span><strong>Email</strong>hello@beanora.vn</span></div><div><Phone /><span><strong>Hotline</strong>Đang được cập nhật</span></div><div><MessageCircle /><span><strong>Giờ hỗ trợ</strong>Thứ Hai – Thứ Bảy · 08:00–18:00</span></div></div><ContactForm /></div></section></>; }

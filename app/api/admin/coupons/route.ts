@@ -1,0 +1,6 @@
+import { NextResponse } from "next/server";
+import { z } from "zod";
+import { prisma } from "@/lib/prisma";
+import { requirePermission } from "@/lib/auth";
+import { apiError } from "@/lib/http";
+export async function POST(request: Request) { try { const admin = await requirePermission("settings:write"); const input = z.object({ code: z.string().regex(/^[A-Za-z0-9_-]+$/), type: z.enum(["PERCENT","FIXED"]), value: z.number().int().positive(), minimumOrder: z.number().int().nonnegative(), maxDiscount: z.number().int().positive().nullable(), usageLimit: z.number().int().positive().nullable(), perUserLimit: z.number().int().positive(), startsAt: z.string().datetime(), endsAt: z.string().datetime() }).parse(await request.json()); if (input.type === "PERCENT" && input.value > 100) throw new Error("Giảm phần trăm không vượt quá 100%."); if (new Date(input.endsAt) <= new Date(input.startsAt)) throw new Error("Thời gian kết thúc phải sau thời gian bắt đầu."); const coupon = await prisma.coupon.create({ data: { ...input, code: input.code.toUpperCase() } }); await prisma.adminAuditLog.create({ data: { actorId: admin.id, action: "COUPON_CREATE", entityType: "Coupon", entityId: coupon.id } }); return NextResponse.json({ coupon }, { status: 201 }); } catch (error) { return apiError(error); } }
