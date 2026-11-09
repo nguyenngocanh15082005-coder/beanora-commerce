@@ -2,6 +2,10 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  outputFileTracingIncludes: {
+    "/api/invoices/[invoiceNumber]/pdf": ["./assets/fonts/**/*"],
+    "/api/invoices/**": ["./assets/fonts/**/*"],
+  },
   images: {
     formats: ["image/avif", "image/webp"],
   },

@@ -1,16 +1,22 @@
 import "server-only";
 import PDFDocument from "pdfkit";
+import fs from "fs";
 import path from "path";
 import type { Prisma } from "@prisma/client";
 import { formatDate, formatPrice, paymentMethodLabels, paymentStatusLabels } from "@/lib/format";
 
 type InvoiceWithRelations = Prisma.InvoiceGetPayload<{ include: { items: true; order: true } }>;
 
+// Đọc font bằng fs.readFileSync với đường dẫn tĩnh để Vercel output tracing
+// bundle được file font vào serverless function (PDFKit tự đọc file sẽ không trace được).
+const fontRegular = fs.readFileSync(path.join(process.cwd(), "assets/fonts/DejaVuSans.ttf"));
+const fontBold = fs.readFileSync(path.join(process.cwd(), "assets/fonts/DejaVuSans-Bold.ttf"));
+
 export async function createInvoicePdf(invoice: InvoiceWithRelations): Promise<Buffer> {
   return new Promise((resolve, reject) => {
-    const regular = path.join(process.cwd(), "assets/fonts/DejaVuSans.ttf");
-    const bold = path.join(process.cwd(), "assets/fonts/DejaVuSans-Bold.ttf");
-    const doc = new PDFDocument({ size: "A4", margin: 48, font: regular, info: { Title: `Hóa đơn ${invoice.invoiceNumber}`, Author: "Beanora Coffee" } });
+    const regular = fontRegular;
+    const bold = fontBold;
+    const doc = new PDFDocument({ size: "A4", margin: 48, info: { Title: `Hóa đơn ${invoice.invoiceNumber}`, Author: "Beanora Coffee" } });
     const chunks: Buffer[] = [];
     doc.on("data", (chunk) => chunks.push(chunk));
     doc.on("end", () => resolve(Buffer.concat(chunks)));

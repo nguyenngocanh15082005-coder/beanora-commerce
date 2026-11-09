@@ -1,0 +1,17 @@
+node_modules
+.next
+.env
+.env.*
+!.env.example
+backups
+test-results
+playwright-report
+coverage
+.git
+.vercel
+*.log
+*.zip
+*.dump
+tests
+docs
+scripts
